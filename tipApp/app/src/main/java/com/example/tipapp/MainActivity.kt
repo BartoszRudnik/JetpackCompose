@@ -12,6 +12,9 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tipapp.components.InputField
+import com.example.tipapp.components.RoundedIconButton
 import com.example.tipapp.ui.theme.TipAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -68,6 +72,9 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
         totalBillState.value.trim().isNotEmpty()
     }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val numberOfPeople = remember {
+        mutableStateOf(1)
+    }
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -89,6 +96,34 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                     keyboardController?.hide()
                 }
             )
+
+            if (validState) {
+                Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.Start) {
+                    Text(
+                        text = "Split",
+                        style = MaterialTheme.typography.h4,
+                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                    )
+                    Spacer(modifier = Modifier.width(120.dp))
+                    Row(horizontalArrangement = Arrangement.End) {
+                        RoundedIconButton(
+                            imageVector = Icons.Default.Remove,
+                            onClickEvent = { numberOfPeople.value -= 1 },
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = numberOfPeople.value.toString(),
+                            style = MaterialTheme.typography.h4
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        RoundedIconButton(
+                            imageVector = Icons.Default.Add,
+                            onClickEvent = { numberOfPeople.value += 1 })
+                    }
+                }
+            } else {
+                Box {}
+            }
         }
     }
 }
