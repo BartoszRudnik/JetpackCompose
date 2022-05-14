@@ -8,10 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
@@ -36,7 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                TopHeader(12.0)
+                MainContent()
             }
         }
     }
@@ -61,9 +58,8 @@ fun MainContent() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-@Preview
 @Composable
+@OptIn(ExperimentalComposeUiApi::class)
 fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) {
     val totalBillState = remember {
         mutableStateOf("")
@@ -75,66 +71,124 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
     val numberOfPeople = remember {
         mutableStateOf(1)
     }
+    val tipAmount = remember {
+        mutableStateOf(0.0)
+    }
+    val tipPercentage = remember {
+        mutableStateOf(0.0f)
+    }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(corner = CornerSize(8.dp)),
-        border = BorderStroke(2.dp, Color.LightGray)
-    ) {
-        Column() {
-            InputField(
-                valueState = totalBillState,
-                labelId = "Enter bill",
-                enabled = true,
-                isSingleLine = true,
-                onAction = KeyboardActions {
-                    if (!validState) {
-                        return@KeyboardActions
+    Column {
+        TopHeader()
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(corner = CornerSize(8.dp)),
+            border = BorderStroke(2.dp, Color.LightGray)
+        ) {
+            Column() {
+                InputField(
+                    valueState = totalBillState,
+                    labelId = "Enter bill",
+                    enabled = true,
+                    isSingleLine = true,
+                    onAction = KeyboardActions {
+                        if (!validState) {
+                            return@KeyboardActions
+                        }
+                        onValChange(totalBillState.value.trim())
+
+                        keyboardController?.hide()
                     }
-                    onValChange(totalBillState.value.trim())
+                )
 
-                    keyboardController?.hide()
-                }
-            )
+                if (validState) {
+                    Column() {
+                        Row(
+                            modifier = Modifier.padding(4.dp),
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            Text(
+                                text = "Split",
+                                style = MaterialTheme.typography.h4,
+                                modifier = Modifier.align(alignment = Alignment.CenterVertically)
+                            )
+                            Spacer(modifier = Modifier.width(120.dp))
+                            Row(horizontalArrangement = Arrangement.End) {
+                                RoundedIconButton(
+                                    imageVector = Icons.Default.Remove,
+                                    onClickEvent = { if (numberOfPeople.value > 1) numberOfPeople.value -= 1 },
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(
+                                    text = numberOfPeople.value.toString(),
+                                    style = MaterialTheme.typography.h4
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                RoundedIconButton(
+                                    imageVector = Icons.Default.Add,
+                                    onClickEvent = { numberOfPeople.value += 1 })
+                            }
+                        }
+                        Row(
+                            modifier = Modifier.padding(4.dp),
+                            horizontalArrangement = Arrangement.Start
+                        ) {
+                            val tipFormatted = "%.2f".format(tipAmount.value)
 
-            if (validState) {
-                Row(modifier = Modifier.padding(4.dp), horizontalArrangement = Arrangement.Start) {
-                    Text(
-                        text = "Split",
-                        style = MaterialTheme.typography.h4,
-                        modifier = Modifier.align(alignment = Alignment.CenterVertically)
-                    )
-                    Spacer(modifier = Modifier.width(120.dp))
-                    Row(horizontalArrangement = Arrangement.End) {
-                        RoundedIconButton(
-                            imageVector = Icons.Default.Remove,
-                            onClickEvent = { numberOfPeople.value -= 1 },
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = numberOfPeople.value.toString(),
-                            style = MaterialTheme.typography.h4
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        RoundedIconButton(
-                            imageVector = Icons.Default.Add,
-                            onClickEvent = { numberOfPeople.value += 1 })
+                            Text(
+                                text = "Tip",
+                                modifier = Modifier.align(alignment = Alignment.CenterVertically),
+                                style = MaterialTheme.typography.h4
+                            )
+                            Spacer(modifier = Modifier.width(200.dp))
+                            Text(
+                                text = "$$tipFormatted",
+                                modifier = Modifier.align(alignment = Alignment.CenterVertically),
+                                style = MaterialTheme.typography.h4
+                            )
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            val tipPercentageFormatted = "%.0f".format(tipPercentage.value * 100)
+
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Text(
+                                text = "$tipPercentageFormatted%",
+                                style = MaterialTheme.typography.h4
+                            )
+                            Spacer(modifier = Modifier.height(20.dp))
+                            Slider(
+                                modifier = Modifier.padding(8.dp),
+                                steps = 5,
+                                value = tipPercentage.value,
+                                onValueChange = { newValue ->
+                                    tipPercentage.value = newValue
+                                    tipAmount.value =
+                                        (tipPercentage.value * totalBillState.value.trim()
+                                            .toInt()).toDouble()
+                                })
+                        }
+
                     }
+
+                } else {
+                    Box {}
                 }
-            } else {
-                Box {}
             }
         }
     }
 }
 
-@Preview
 @Composable
 fun TopHeader(total: Double = 0.0) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
+            .padding(8.dp)
             .clip(shape = RoundedCornerShape(corner = CornerSize(12.dp))),
         color = Color.Green
     ) {
@@ -151,13 +205,5 @@ fun TopHeader(total: Double = 0.0) {
                 fontWeight = FontWeight.Bold
             )
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    TipAppTheme {
-
     }
 }
