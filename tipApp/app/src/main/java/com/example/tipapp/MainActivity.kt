@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.example.tipapp.components.InputField
 import com.example.tipapp.components.RoundedIconButton
 import com.example.tipapp.ui.theme.TipAppTheme
+import com.example.tipapp.util.calculateTotalPerPerson
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,9 +78,22 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
     val tipPercentage = remember {
         mutableStateOf(0.0f)
     }
+    val totalPerPerson = remember(totalBillState.value, numberOfPeople.value, tipPercentage.value) {
+        if (validState) {
+            mutableStateOf(
+                calculateTotalPerPerson(
+                    totalBillState.value.toDouble(),
+                    numberOfPeople.value,
+                    tipPercentage.value
+                )
+            )
+        } else {
+            mutableStateOf(0.0)
+        }
+    }
 
     Column {
-        TopHeader()
+        TopHeader(totalPerPerson.value)
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(corner = CornerSize(8.dp)),
@@ -116,7 +130,9 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                             Row(horizontalArrangement = Arrangement.End) {
                                 RoundedIconButton(
                                     imageVector = Icons.Default.Remove,
-                                    onClickEvent = { if (numberOfPeople.value > 1) numberOfPeople.value -= 1 },
+                                    onClickEvent = {
+                                        if (numberOfPeople.value > 1) numberOfPeople.value -= 1
+                                    },
                                 )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Text(
@@ -126,7 +142,9 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                                 Spacer(modifier = Modifier.width(10.dp))
                                 RoundedIconButton(
                                     imageVector = Icons.Default.Add,
-                                    onClickEvent = { numberOfPeople.value += 1 })
+                                    onClickEvent = {
+                                        numberOfPeople.value += 1
+                                    })
                             }
                         }
                         Row(
