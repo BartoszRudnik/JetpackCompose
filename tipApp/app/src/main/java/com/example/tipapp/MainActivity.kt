@@ -22,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.tipapp.components.InputField
 import com.example.tipapp.components.RoundedIconButton
@@ -54,14 +53,14 @@ fun MyApp(content: @Composable () -> Unit) {
 
 @Composable
 fun MainContent() {
-    BillForm() { billAmount ->
+    BillForm { billAmount ->
         {}
     }
 }
 
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
-fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) {
+fun BillForm(onValChange: (String) -> Unit = {}) {
     val totalBillState = remember {
         mutableStateOf("")
     }
@@ -99,7 +98,7 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
             shape = RoundedCornerShape(corner = CornerSize(8.dp)),
             border = BorderStroke(2.dp, Color.LightGray)
         ) {
-            Column() {
+            Column {
                 InputField(
                     valueState = totalBillState,
                     labelId = "Enter bill",
@@ -116,7 +115,7 @@ fun BillForm(modifier: Modifier = Modifier, onValChange: (String) -> Unit = {}) 
                 )
 
                 if (validState) {
-                    Column() {
+                    Column {
                         Row(
                             modifier = Modifier.padding(4.dp),
                             horizontalArrangement = Arrangement.Start
