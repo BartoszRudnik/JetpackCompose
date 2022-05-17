@@ -20,13 +20,14 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.movieapp.ui.theme.MovieAppTheme
+import com.example.movieapp.ui.theme.navigation.MovieNavigation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                MainContent()
+                MovieNavigation()
             }
         }
     }
@@ -45,56 +46,7 @@ fun MyApp(content: @Composable () -> Unit) {
     }
 }
 
-@Composable
-fun MainContent(
-    movieList: List<String> = listOf(
-        "Avatar",
-        "300",
-        "Harry Potter"
-    )
-) {
-    Surface(color = MaterialTheme.colors.background) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            LazyColumn {
-                items(items = movieList) {
-                    MovieRow(movie = it) { movie ->
 
-                    }
-                }
-            }
-        }
-    }
-}
 
-@Composable
-fun MovieRow(movie: String, onItemClick: (String) -> Unit = {}) {
-    Card(
-        modifier = Modifier
-            .padding(4.dp)
-            .fillMaxWidth()
-            .height(130.dp)
-            .clickable {
-                onItemClick(movie)
-            },
-        shape = RoundedCornerShape(corner = CornerSize(16.dp)),
-        elevation = 8.dp
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            Surface(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .size(100.dp),
-                shape = RectangleShape,
-                elevation = 4.dp
-            ) {
-                Icon(imageVector = Icons.Default.AccountBox, "")
-            }
-            Text(text = movie)
-        }
-    }
-}
 
 
