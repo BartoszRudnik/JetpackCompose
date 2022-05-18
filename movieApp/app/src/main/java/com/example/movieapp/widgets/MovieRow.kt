@@ -1,5 +1,6 @@
 package com.example.movieapp.widgets
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,9 +9,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
@@ -18,6 +22,10 @@ import com.example.movieapp.model.Movie
 
 @Composable
 fun MovieRow(movie: Movie, onItemClick: (String) -> Unit = {}) {
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
     Card(
         modifier = Modifier
             .padding(4.dp)
@@ -41,12 +49,28 @@ fun MovieRow(movie: Movie, onItemClick: (String) -> Unit = {}) {
                 elevation = 4.dp
             ) {
                 Image(painter = rememberImagePainter(data = movie.poster), contentDescription = "")
-                //Icon(imageVector = Icons.Default.AccountBox, "")
             }
             Column(modifier = Modifier.padding(4.dp)) {
                 Text(text = movie.title, style = MaterialTheme.typography.h6)
                 Text(text = movie.director, style = MaterialTheme.typography.caption)
                 Text(text = movie.year, style = MaterialTheme.typography.caption)
+
+                AnimatedVisibility(visible = expanded) {
+                    Column() {
+                        Text(text = movie.plot, style = MaterialTheme.typography.caption)
+                    }
+                }
+
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(25.dp)
+                        .clickable {
+                            expanded = !expanded
+                        },
+                    tint = Color.DarkGray
+                )
             }
         }
     }
