@@ -56,8 +56,21 @@ fun MovieRow(movie: Movie, onItemClick: (String) -> Unit = {}) {
                 Text(text = movie.year, style = MaterialTheme.typography.caption)
 
                 AnimatedVisibility(visible = expanded) {
-                    Column() {
+                    Column(modifier = Modifier.padding(4.dp)) {
                         Text(text = movie.plot, style = MaterialTheme.typography.caption)
+                        Divider()
+                        Text(
+                            text = "Director: ${movie.director}",
+                            style = MaterialTheme.typography.caption
+                        )
+                        Text(
+                            text = "Actors: ${movie.actors}",
+                            style = MaterialTheme.typography.caption
+                        )
+                        Text(
+                            text = "Rating: ${movie.rating}",
+                            style = MaterialTheme.typography.caption
+                        )
                     }
                 }
 
