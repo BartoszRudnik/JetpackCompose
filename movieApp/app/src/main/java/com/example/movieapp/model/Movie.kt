@@ -1,6 +1,11 @@
 package com.example.movieapp.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "movie")
 data class Movie(
+    @PrimaryKey
     val id: String,
     val title: String,
     val year: String,
