@@ -1,5 +1,6 @@
 package com.example.noteapp.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.noteapp.R
@@ -32,6 +34,8 @@ fun NoteScreen(notes: List<Note>, onAddNote: (Note) -> Unit, onRemoveNote: (Note
     var description by remember {
         mutableStateOf("")
     }
+
+    val context = LocalContext.current
 
     Column(modifier = Modifier.padding(6.dp)) {
         TopAppBar(title = {
@@ -70,9 +74,11 @@ fun NoteScreen(notes: List<Note>, onAddNote: (Note) -> Unit, onRemoveNote: (Note
             )
             NoteButton(text = "Save", onClick = {
                 if (title.isNotEmpty() && description.isNotEmpty()) {
-
+                    onAddNote(Note(title = title, description = description))
                     title = ""
                     description = ""
+
+                    Toast.makeText(context, "Note add", Toast.LENGTH_LONG).show()
                 }
             }, modifier = Modifier.padding(8.dp))
         }
