@@ -66,6 +66,7 @@ dependencies {
     implementation 'org.jetbrains.kotlin:kotlinx-coroutines-android:1.5.2'
     implementation 'org.jetbrains.kotlin:kotlinx-coroutines-play-services:1.5.2'
     kapt("androidx.room:room-compiler:2.4.2")
+    implementation 'androix.room:room-ktx:2.4.2'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
