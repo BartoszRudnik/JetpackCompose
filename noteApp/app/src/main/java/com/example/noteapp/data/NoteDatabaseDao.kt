@@ -3,6 +3,7 @@ package com.example.noteapp.data
 import androidx.room.*
 import com.example.noteapp.model.Note
 import kotlinx.coroutines.flow.Flow
+import java.util.*
 
 @Dao
 interface NoteDatabaseDao {
@@ -23,5 +24,5 @@ interface NoteDatabaseDao {
     suspend fun deleteAll()
 
     @Query("DELETE from note where id =:id")
-    suspend fun deleteSingleNote(id: String)
+    suspend fun deleteSingleNote(id: UUID)
 }
