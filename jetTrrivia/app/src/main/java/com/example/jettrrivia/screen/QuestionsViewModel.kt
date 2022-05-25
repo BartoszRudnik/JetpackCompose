@@ -1,4 +1,4 @@
-package com.example.jettrrivia
+package com.example.jettrrivia.screen
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -14,8 +14,9 @@ import javax.inject.Inject
 @HiltViewModel
 class QuestionsViewModel @Inject constructor(private val questionRepository: QuestionRepository) :
     ViewModel() {
-    private val data: MutableState<DataOrException<ArrayList<Question>, Boolean, Exception>> =
-        mutableStateOf(DataOrException(null, true, Exception("")))
+    val data: MutableState<DataOrException<ArrayList<Question>,
+            Boolean, Exception>> = mutableStateOf(
+        DataOrException(null, true, Exception("")) )
 
     init {
         getAllQuestions()
