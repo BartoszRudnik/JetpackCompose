@@ -16,10 +16,15 @@ class QuestionsViewModel @Inject constructor(private val questionRepository: Que
     ViewModel() {
     val data: MutableState<DataOrException<ArrayList<Question>,
             Boolean, Exception>> = mutableStateOf(
-        DataOrException(null, true, Exception("")) )
+        DataOrException(null, true, Exception(""))
+    )
 
     init {
         getAllQuestions()
+    }
+
+    fun getTotalQuestionCount(): Int {
+        return data.value.data?.toMutableList()!!.size
     }
 
     private fun getAllQuestions() {
