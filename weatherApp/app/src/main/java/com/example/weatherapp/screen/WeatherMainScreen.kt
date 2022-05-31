@@ -103,6 +103,7 @@ fun MainContent(weatherData: Weather) {
         HumidityWindPressureRow(weatherItem = weatherData.list[0])
         Divider()
         SunriseAndSunsetRow(weatherItem = weatherData.list[0])
+        Text("This Week", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
     }
 }
 
