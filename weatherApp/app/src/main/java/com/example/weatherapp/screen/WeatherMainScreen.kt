@@ -26,6 +26,7 @@ import com.example.weatherapp.R
 import com.example.weatherapp.data.DataOrException
 import com.example.weatherapp.model.Weather
 import com.example.weatherapp.model.WeatherItem
+import com.example.weatherapp.navigation.WeatherScreens
 import com.example.weatherapp.util.formatDate
 import com.example.weatherapp.util.formatDateTime
 import com.example.weatherapp.util.formatDecimals
@@ -57,7 +58,10 @@ fun MainScaffold(weatherData: Weather, navController: NavController) {
         WeatherAppBar(
             navController = navController,
             title = weatherData.city.name + ", ${weatherData.city.country}",
-            elevation = 5.dp, icon = Icons.Default.ArrowBack
+            elevation = 5.dp, icon = Icons.Default.ArrowBack,
+            onAddActionClicked = {
+                navController.navigate(WeatherScreens.SearchScreen.name)
+            }
         ) {
 
         }

@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherapp.screen.MainViewModel
 import com.example.weatherapp.screen.WeatherMainScreen
+import com.example.weatherapp.screen.WeatherSearchScreen
 import com.example.weatherapp.screen.WeatherSplashScreen
 
 @Composable
@@ -22,6 +23,10 @@ fun WeatherNavigation() {
             val mainViewModel = hiltViewModel<MainViewModel>()
 
             WeatherMainScreen(navController = navController, mainViewModel)
+        }
+
+        composable(WeatherScreens.SearchScreen.name) {
+            WeatherSearchScreen(navController = navController)
         }
     }
 }
