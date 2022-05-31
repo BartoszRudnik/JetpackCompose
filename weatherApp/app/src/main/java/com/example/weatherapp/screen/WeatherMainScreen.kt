@@ -2,7 +2,11 @@ package com.example.weatherapp.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -15,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.weatherapp.R
@@ -25,8 +30,6 @@ import com.example.weatherapp.util.formatDate
 import com.example.weatherapp.util.formatDateTime
 import com.example.weatherapp.util.formatDecimals
 import com.example.weatherapp.widgets.WeatherAppBar
-import java.lang.Exception
-import java.sql.Timestamp
 
 @Composable
 fun WeatherMainScreen(navController: NavController, viewModel: MainViewModel) {
@@ -103,7 +106,64 @@ fun MainContent(weatherData: Weather) {
         HumidityWindPressureRow(weatherItem = weatherData.list[0])
         Divider()
         SunriseAndSunsetRow(weatherItem = weatherData.list[0])
-        Text("This Week", style = MaterialTheme.typography.subtitle1, fontWeight = FontWeight.Bold)
+        Text(
+            "This Week",
+            style = MaterialTheme.typography.subtitle1,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(), color = Color(0XFFEEF1EF),
+            shape = RoundedCornerShape(size = 14.dp)
+        ) {
+            LazyColumn(modifier = Modifier.padding(4.dp), contentPadding = PaddingValues(2.dp)) {
+                items(items = weatherData.list) { item: WeatherItem ->
+                    WeatherDetailRow(weather = item)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WeatherDetailRow(weather: WeatherItem) {
+    val imageUrl = "https://openweathermap.org/img/wn/${weather.weather[0].icon}.png"
+
+    Surface(
+        modifier = Modifier
+            .padding(4.dp)
+            .fillMaxWidth(),
+        shape = CircleShape.copy(topEnd = CornerSize(6.dp)),
+        color = Color.White
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(formatDate(weather.dt).split(",")[0], modifier = Modifier.padding(4.dp))
+            WeatherStateImage(imageUrl = imageUrl)
+            Surface(modifier = Modifier.padding(4.dp), shape = CircleShape) {
+                Text(
+                    weather.weather[0].description,
+                    modifier = Modifier.padding(4.dp),
+                    style = MaterialTheme.typography.caption
+                )
+            }
+            Text(
+                text = weather.temp.max.toString() + "°",
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Blue.copy(alpha = 0.7f)
+            )
+            Text(
+                text = weather.temp.min.toString() + "°",
+                fontWeight = FontWeight.SemiBold,
+                color = Color.Gray.copy(alpha = 0.7f)
+            )
+        }
     }
 }
 
