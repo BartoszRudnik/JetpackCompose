@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+    <string name="about_app">About App</string>
+    <string name="api_used">API Name</string>
 </resources>
