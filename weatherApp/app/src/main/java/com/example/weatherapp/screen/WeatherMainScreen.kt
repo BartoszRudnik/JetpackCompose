@@ -33,14 +33,14 @@ import com.example.weatherapp.util.formatDecimals
 import com.example.weatherapp.widgets.WeatherAppBar
 
 @Composable
-fun WeatherMainScreen(navController: NavController, viewModel: MainViewModel) {
+fun WeatherMainScreen(navController: NavController, viewModel: MainViewModel, city: String) {
     val weatherData =
         produceState<DataOrException<Weather, Boolean, Exception>>(
             initialValue = DataOrException(
                 loading = true
             )
         ) {
-            value = viewModel.getWeatherData(city = "Seattle", units = "imperial")
+            value = viewModel.getWeatherData(city = city, units = "imperial")
         }.value
 
     if (weatherData.loading == true) {

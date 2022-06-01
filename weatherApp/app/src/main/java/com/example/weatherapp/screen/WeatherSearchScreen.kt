@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.weatherapp.navigation.WeatherScreens
 import com.example.weatherapp.widgets.WeatherAppBar
 
 @Composable
@@ -46,27 +47,42 @@ fun WeatherSearchScreen(navController: NavController) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Search")
+                SearchBar(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .align(alignment = Alignment.CenterHorizontally)
+                ) { city ->
+                    navController.navigate(WeatherScreens.MainScreen.name + "/$city")
+                }
             }
         }
     }
 }
 
 @Composable
-fun SearchBar(onSearch: (String) -> Unit = {}) {
+fun SearchBar(modifier: Modifier = Modifier, onSearch: (String) -> Unit = {}) {
     val searchQueryState = rememberSaveable {
         mutableStateOf("")
     }
     val keyboardController = LocalSoftwareKeyboardController.current
     val valid = remember(searchQueryState.value) {
-        searchQueryState.value.trim().isNotBlank()
+        searchQueryState.value.trim().isNotEmpty()
     }
 
-    Column() {
+    Column(modifier = modifier) {
         CommonTextField(
             valueState = searchQueryState,
             placeholder = "Seattle",
-            onAction = KeyboardActions { })
+            onAction = KeyboardActions {
+                if (!valid) {
+                    return@KeyboardActions
+                } else {
+                    onSearch.invoke(searchQueryState.value.trim())
+                    searchQueryState.value = ""
+                    keyboardController!!.hide()
+                }
+            })
     }
 }
 
