@@ -1,27 +1,30 @@
 package com.example.weatherapp.widgets
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.weatherapp.model.Favorite
 import com.example.weatherapp.navigation.WeatherScreens
+import com.example.weatherapp.screen.FavoriteViewModel
 
 @Composable
 fun WeatherAppBar(
@@ -29,9 +32,10 @@ fun WeatherAppBar(
     icon: ImageVector? = null,
     isMainScreen: Boolean = true,
     elevation: Dp = 0.dp,
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
     navController: NavController,
     onAddActionClicked: () -> Unit = {},
-    onButtonClicked: () -> Unit = {}
+    onButtonClicked: () -> Unit = {},
 ) {
     val showDialog = remember {
         mutableStateOf(false)
@@ -40,6 +44,8 @@ fun WeatherAppBar(
     if (showDialog.value) {
         ShowSettingDropDownMenu(showDialog = showDialog, navController = navController)
     }
+
+    val context = LocalContext.current
 
     TopAppBar(
         title = {
@@ -67,13 +73,53 @@ fun WeatherAppBar(
             }
         },
         navigationIcon = {
-            if (icon != null) {
+
+
+            if (icon != null && !isMainScreen) {
                 Icon(
                     imageVector = icon,
                     contentDescription = "Navigation icon",
                     tint = MaterialTheme.colors.onSecondary,
                     modifier = Modifier.clickable { onButtonClicked.invoke() }
                 )
+            } else if (isMainScreen) {
+                val titleSplit = title.split(",")
+
+                val favorite = Favorite(
+                    city = titleSplit[0],
+                    country = titleSplit[1]
+                )
+                val isNotFavorite =
+                    favoriteViewModel.favList.collectAsState().value.filter { item ->
+                        (item.city == favorite.city && item.country == favorite.country)
+                    }.toList().isEmpty()
+
+                if (isNotFavorite) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorite icon",
+                        modifier = Modifier
+                            .scale(0.9f)
+                            .padding(4.dp)
+                            .clickable {
+                                favoriteViewModel
+                                    .insertFavorite(
+                                        favorite
+                                    )
+                                    .run {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                "Added to Favorites",
+                                                Toast.LENGTH_LONG
+                                            )
+                                            .show()
+                                    }
+                            }, tint = Color.Red.copy(alpha = 0.6f)
+                    )
+                } else {
+                    Box {}
+                }
             }
         },
         backgroundColor = Color.Transparent,
@@ -86,7 +132,7 @@ fun ShowSettingDropDownMenu(showDialog: MutableState<Boolean>, navController: Na
     var expanded by remember {
         mutableStateOf(true)
     }
-    var items = listOf<String>("About", "Favorites", "Settings")
+    val items = listOf("About", "Favorites", "Settings")
 
     Column(
         modifier = Modifier
@@ -101,7 +147,7 @@ fun ShowSettingDropDownMenu(showDialog: MutableState<Boolean>, navController: Na
                 .width(140.dp)
                 .background(Color.White)
         ) {
-            items.forEachIndexed { index, text ->
+            items.forEachIndexed { _, text ->
                 DropdownMenuItem(onClick = {
                     expanded = false
                     showDialog.value = false
