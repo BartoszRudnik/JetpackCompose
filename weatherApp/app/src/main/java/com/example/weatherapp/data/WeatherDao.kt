@@ -2,6 +2,7 @@ package com.example.weatherapp.data
 
 import androidx.room.*
 import com.example.weatherapp.model.Favorite
+import com.example.weatherapp.model.Unit
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -23,4 +24,19 @@ interface WeatherDao {
 
     @Query("DELETE from fav_tbl WHERE city =:city")
     suspend fun deleteFavById(city: String)
+
+    @Query("SELECT * from settings_tbl")
+    fun getUnits(): Flow<List<Unit>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUnit(unit: Unit)
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateUnit(unit: Unit)
+
+    @Query("DELETE from settings_tbl")
+    suspend fun deleteAllUnits()
+
+    @Query("DELETE from settings_tbl WHERE unit =:unit")
+    suspend fun deleteUnitById(unit: Unit)
 }
