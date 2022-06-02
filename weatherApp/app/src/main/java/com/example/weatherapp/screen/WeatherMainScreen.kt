@@ -10,8 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,6 +19,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.weatherapp.R
@@ -33,27 +33,45 @@ import com.example.weatherapp.util.formatDecimals
 import com.example.weatherapp.widgets.WeatherAppBar
 
 @Composable
-fun WeatherMainScreen(navController: NavController, viewModel: MainViewModel, city: String) {
-    val weatherData =
-        produceState<DataOrException<Weather, Boolean, Exception>>(
-            initialValue = DataOrException(
-                loading = true
-            )
-        ) {
-            value = viewModel.getWeatherData(city = city, units = "imperial")
-        }.value
-
-    if (weatherData.loading == true) {
-        CircularProgressIndicator()
-    } else if (weatherData.data != null) {
-        MainScaffold(weatherData.data!!, navController)
+fun WeatherMainScreen(
+    navController: NavController,
+    viewModel: MainViewModel,
+    city: String,
+    settingsViewModel: SettingsViewModel = hiltViewModel()
+) {
+    val curCity: String = city.ifBlank { "Seattle" }
+    val unitFromDb = settingsViewModel.unitList.collectAsState().value
+    var unit by remember {
+        mutableStateOf("imperial")
+    }
+    var isImperial by remember {
+        mutableStateOf(false)
     }
 
+    if (unitFromDb.isNotEmpty()) {
+        unit = unitFromDb[0].unit.split(" ")[0]
 
+        isImperial = unit.lowercase() == "imperial"
+
+        val weatherData =
+            produceState<DataOrException<Weather, Boolean, Exception>>(
+                initialValue = DataOrException(
+                    loading = true
+                )
+            ) {
+                value = viewModel.getWeatherData(city = curCity, units = unit)
+            }.value
+
+        if (weatherData.loading == true) {
+            CircularProgressIndicator()
+        } else if (weatherData.data != null) {
+            MainScaffold(weatherData.data!!, navController, isImperial = isImperial)
+        }
+    }
 }
 
 @Composable
-fun MainScaffold(weatherData: Weather, navController: NavController) {
+fun MainScaffold(weatherData: Weather, navController: NavController, isImperial: Boolean) {
     Scaffold(topBar = {
         WeatherAppBar(
             navController = navController,
@@ -66,12 +84,12 @@ fun MainScaffold(weatherData: Weather, navController: NavController) {
 
         }
     }) {
-        MainContent(weatherData = weatherData)
+        MainContent(weatherData = weatherData, isImperial)
     }
 }
 
 @Composable
-fun MainContent(weatherData: Weather) {
+fun MainContent(weatherData: Weather, isImperial: Boolean) {
     val imageUrl = "https://openweathermap.org/img/wn/${weatherData.list[0].weather[0].icon}.png"
 
     Column(
@@ -107,7 +125,7 @@ fun MainContent(weatherData: Weather) {
             }
         }
 
-        HumidityWindPressureRow(weatherItem = weatherData.list[0])
+        HumidityWindPressureRow(weatherItem = weatherData.list[0], isImperial = isImperial)
         Divider()
         SunriseAndSunsetRow(weatherItem = weatherData.list[0])
         Text(
@@ -194,7 +212,7 @@ fun SunriseAndSunsetRow(weatherItem: WeatherItem) {
 }
 
 @Composable
-fun HumidityWindPressureRow(weatherItem: WeatherItem) {
+fun HumidityWindPressureRow(weatherItem: WeatherItem, isImperial: Boolean) {
     Row(
         modifier = Modifier
             .padding(12.dp)
@@ -205,17 +223,20 @@ fun HumidityWindPressureRow(weatherItem: WeatherItem) {
         HumidityRowItem(
             iconId = R.drawable.humidity,
             value = weatherItem.humidity,
-            contentDescription = "Humidity icon"
+            contentDescription = "Humidity icon",
+            isImperial = isImperial
         )
         HumidityRowItem(
             iconId = R.drawable.pressure,
             value = weatherItem.pressure,
-            contentDescription = "Pressure icon"
+            contentDescription = "Pressure icon",
+            isImperial = isImperial
         )
         HumidityRowItem(
             iconId = R.drawable.wind,
             value = weatherItem.speed.toInt(),
-            contentDescription = "Wind icon"
+            contentDescription = "Wind icon",
+            isImperial = isImperial
         )
     }
 }
@@ -233,7 +254,12 @@ private fun SunriseSunsetRowItem(value: Int, iconId: Int, contentDescription: St
 }
 
 @Composable
-private fun HumidityRowItem(iconId: Int, value: Int, contentDescription: String) {
+private fun HumidityRowItem(
+    iconId: Int,
+    value: Int,
+    contentDescription: String,
+    isImperial: Boolean
+) {
     Row(modifier = Modifier.padding(4.dp)) {
         Icon(
             painter = painterResource(id = iconId),
