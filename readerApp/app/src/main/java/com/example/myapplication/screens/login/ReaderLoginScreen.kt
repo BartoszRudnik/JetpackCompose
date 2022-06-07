@@ -29,12 +29,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.myapplication.components.UserForm
+import com.example.myapplication.navigation.ReaderScreens
 import com.example.myapplication.screens.AReaderText
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.format.TextStyle
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ReaderLoginScreen(navController: NavController) {
+fun ReaderLoginScreen(
+    navController: NavController,
+    viewModel: LoginScreenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
     val showLoginForm = rememberSaveable {
         mutableStateOf(true)
     }
@@ -47,8 +52,14 @@ fun ReaderLoginScreen(navController: NavController) {
             AReaderText()
 
             if (showLoginForm.value) UserForm() { email, password ->
+                viewModel.loginUserWithEmailAndPassword(email, password) {
+                    navController.navigate(ReaderScreens.HomeScreen.name)
+                }
             }
             else UserForm(loading = false, isCreateAccount = true) { email, password ->
+                viewModel.createUserWithEmailAndPassword(email, password) {
+                    navController.navigate(ReaderScreens.HomeScreen.name)
+                }
             }
 
             Spacer(modifier = Modifier.height(15.dp))
