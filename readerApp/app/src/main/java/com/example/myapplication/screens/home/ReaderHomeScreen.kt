@@ -1,18 +1,20 @@
 package com.example.myapplication.screens.home
 
+import android.widget.Space
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -21,6 +23,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import com.example.myapplication.components.FABContent
+import com.example.myapplication.components.HomeScreenTopBar
+import com.example.myapplication.components.TitleSection
 import com.example.myapplication.model.Book
 import com.example.myapplication.navigation.ReaderScreens
 import com.google.firebase.auth.FirebaseAuth
@@ -43,7 +49,7 @@ fun ReaderHomeScreen(navController: NavController) {
 fun HomeContent(navController: NavController) {
     val currentUserName = FirebaseAuth.getInstance().currentUser?.email!!.split("@")[0]
 
-    Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.SpaceEvenly) {
+    Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.Top) {
         Row(modifier = Modifier.align(alignment = Alignment.Start)) {
             TitleSection(label = "Your reading \n" + " activity right now")
             Spacer(modifier = Modifier.fillMaxWidth(0.7f))
@@ -69,73 +75,133 @@ fun HomeContent(navController: NavController) {
                 Divider()
             }
         }
+        ListCard()
     }
 }
 
 @Composable
-fun HomeScreenTopBar(navController: NavController, title: String, showProfile: Boolean = true) {
-    TopAppBar(title = {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (showProfile) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = "",
-                    modifier = Modifier.padding(4.dp)
+fun ListCard(
+    book: Book = Book("adf", "Running", "Me and you", "hello world"),
+    onPressDetails: (String) -> Unit = {}
+) {
+    val context = LocalContext.current
+    val resources = context.resources
+    val displayMetrics = resources.displayMetrics
+
+    val screenWidth = displayMetrics.widthPixels / displayMetrics.density
+    val spacing = 10.dp
+
+    Card(
+        shape = RoundedCornerShape(29.dp),
+        backgroundColor = Color.White,
+        elevation = 6.dp,
+        modifier = Modifier
+            .padding(16.dp)
+            .height(240.dp)
+            .width(200.dp)
+            .clickable { onPressDetails.invoke(book.title.toString()) }
+    ) {
+        Column(
+            modifier = Modifier.width(screenWidth.dp - (spacing * 2)),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Row(horizontalArrangement = Arrangement.Center) {
+                Image(
+                    painter = rememberImagePainter(data = ""),
+                    contentDescription = "Book image",
+                    modifier = Modifier
+                        .height(140.dp)
+                        .width(100.dp)
+                        .padding(4.dp)
                 )
+
+                Spacer(modifier = Modifier.width(50.dp))
+
+                Column(
+                    modifier = Modifier.padding(4.dp),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.FavoriteBorder,
+                        contentDescription = "favorite icon",
+                        modifier = Modifier.padding(2.dp)
+                    )
+                    BookRating()
+                }
             }
             Text(
-                text = title,
-                color = Color.Red.copy(alpha = 0.6f),
-                style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                text = book.title.toString(),
+                modifier = Modifier.padding(4.dp),
+                fontWeight = FontWeight.Bold,
+                maxLines = 2, overflow = TextOverflow.Ellipsis
             )
-            Spacer(modifier = Modifier.width(150.dp))
-        }
-    }, actions = {
-        IconButton(onClick = {
-            FirebaseAuth.getInstance().signOut().run {
-                navController.navigate(ReaderScreens.LoginScreen.name)
+            Text(
+                text = book.authors.toString(),
+                modifier = Modifier.padding(4.dp),
+                style = MaterialTheme.typography.caption
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                RoundedButton(label = "Reading", radius = 70)
             }
-        }) {
-            Icon(
-                imageVector = Icons.Filled.Logout,
-                contentDescription = "logout icon",
-                tint = Color.Green.copy(alpha = 0.6f)
-            )
         }
-    }, backgroundColor = Color.Transparent, elevation = 0.dp)
+    }
 }
 
 @Composable
-fun TitleSection(modifier: Modifier = Modifier, label: String) {
-    Surface(modifier = modifier.padding(5.dp)) {
-        Column() {
+fun RoundedButton(label: String = "Reading", radius: Int = 30, onPress: () -> Unit = {}) {
+    Surface(
+        modifier = Modifier.clip(
+            RoundedCornerShape(
+                bottomEndPercent = radius,
+                topStartPercent = radius
+            )
+        ), color = Color.LightGray
+    ) {
+        Column(
+            modifier = Modifier
+                .width(90.dp)
+                .heightIn(40.dp)
+                .clickable {
+                    onPress.invoke()
+                },
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = label,
-                fontSize = 18.sp,
-                fontStyle = FontStyle.Normal,
-                textAlign = TextAlign.Left
+                style = MaterialTheme.typography.button,
+                color = Color.White,
+                fontSize = 15.sp
             )
         }
     }
 }
 
 @Composable
-fun ReadingRightNowArea(books: List<Book>, navController: NavController) {
-}
-
-@Composable
-fun FABContent(onTap: (String) -> Unit) {
-    FloatingActionButton(
-        onClick = {
-            onTap("")
-        },
-        shape = RoundedCornerShape(50.dp),
-        backgroundColor = MaterialTheme.colors.background
+fun BookRating(score: Double = 3.5) {
+    Surface(
+        modifier = Modifier
+            .height(70.dp)
+            .padding(4.dp), shape = RoundedCornerShape(56.dp), elevation = 6.dp, color = Color.White
     ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "add icon",
-            tint = MaterialTheme.colors.onSecondary
-        )
+        Column(
+            modifier = Modifier.padding(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                imageVector = Icons.Filled.StarBorder,
+                contentDescription = "star icon",
+                modifier = Modifier.padding(2.dp)
+            )
+            Text(text = score.toString(), style = MaterialTheme.typography.subtitle1)
+        }
     }
 }
+
+
+
