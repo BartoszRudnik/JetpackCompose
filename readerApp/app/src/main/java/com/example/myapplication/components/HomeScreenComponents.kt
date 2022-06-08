@@ -1,5 +1,6 @@
 package com.example.myapplication.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +25,13 @@ import com.example.myapplication.navigation.ReaderScreens
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun HomeScreenTopBar(navController: NavController, title: String, showProfile: Boolean = true) {
+fun HomeScreenTopBar(
+    navController: NavController,
+    title: String,
+    showProfile: Boolean = true,
+    icon: ImageVector? = null,
+    onBackArrowClicked: () -> Unit = {}
+) {
     TopAppBar(title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (showProfile) {
@@ -33,6 +41,16 @@ fun HomeScreenTopBar(navController: NavController, title: String, showProfile: B
                     modifier = Modifier.padding(4.dp)
                 )
             }
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Arrow back icon",
+                    modifier = Modifier.clickable {
+                        onBackArrowClicked.invoke()
+                    }, tint = Color.Red.copy(alpha = 0.7f)
+                )
+            }
+            Spacer(modifier = Modifier.width(20.dp))
             Text(
                 text = title,
                 color = Color.Red.copy(alpha = 0.6f),
@@ -46,11 +64,14 @@ fun HomeScreenTopBar(navController: NavController, title: String, showProfile: B
                 navController.navigate(ReaderScreens.LoginScreen.name)
             }
         }) {
-            Icon(
-                imageVector = Icons.Filled.Logout,
-                contentDescription = "logout icon",
-                tint = Color.Green.copy(alpha = 0.6f)
-            )
+            if (showProfile)
+                Icon(
+                    imageVector = Icons.Filled.Logout,
+                    contentDescription = "logout icon",
+                    tint = Color.Green.copy(alpha = 0.6f)
+                )
+            else
+                Box {}
         }
     }, backgroundColor = Color.Transparent, elevation = 0.dp)
 }

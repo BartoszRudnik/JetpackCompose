@@ -35,7 +35,8 @@ fun ReaderHomeScreen(navController: NavController) {
     Scaffold(topBar = {
         HomeScreenTopBar(navController = navController, title = "A. Reader")
     }, floatingActionButton = {
-        FABContent { value ->
+        FABContent {
+            navController.navigate(ReaderScreens.BookSearchScreen.name)
         }
     }) {
         Surface(modifier = Modifier.fillMaxSize()) {
