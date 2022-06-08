@@ -1,13 +1,15 @@
 package com.example.myapplication.screens.home
 
-import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,10 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -75,8 +74,38 @@ fun HomeContent(navController: NavController) {
                 Divider()
             }
         }
-        ListCard()
+        ReadingRightNowArea(books = listOf(), navController = navController)
+        TitleSection(label = "Reading List")
+        BookListArea(listOfBooks = emptyList<Book>(), navController = navController)
     }
+}
+
+@Composable
+fun BookListArea(listOfBooks: List<Book>, navController: NavController) {
+    HorizontalScrollableComponent(listOfBooks) {}
+}
+
+@Composable
+fun HorizontalScrollableComponent(listOfBooks: List<Book>, onCardPressed: (String) -> Unit = {}) {
+    val scrollState = rememberScrollState()
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(280.dp)
+            .horizontalScroll(scrollState)
+    ) {
+        for (book in listOfBooks) {
+            ListCard(book = book) {
+                onCardPressed(it)
+            }
+        }
+    }
+}
+
+@Composable
+fun ReadingRightNowArea(books: List<Book>, navController: NavController) {
+    ListCard()
 }
 
 @Composable
