@@ -25,7 +25,11 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.myapplication.components.HomeScreenTopBar
 import com.example.myapplication.data.DataOrException
+import com.example.myapplication.model.Book
 import com.example.myapplication.model.Item
+import com.example.myapplication.screens.home.RoundedButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun BookDetailsScreen(
@@ -127,6 +131,49 @@ fun ShowBookDetails(
                 }
             }
         }
+        Row(
+            modifier = Modifier.padding(4.dp),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RoundedButton(label = "Save") {
+                val book = Book(
+                    title = bookData.title,
+                    description = bookData.description,
+                    authors = bookData.authors.toString(),
+                    categories = bookData.categories.toString(),
+                    pageCount = bookData.pageCount.toString(),
+                    notes = "",
+                    photoUrl = bookData.imageLinks.thumbnail,
+                    publishedDate = bookData.publishedDate,
+                    rating = 0.0,
+                    googleBookId = googleBookId,
+                    userId = FirebaseAuth.getInstance().currentUser?.uid.toString()
+                )
 
+                saveToFirebase(book, navController)
+            }
+            RoundedButton(label = "Cancel") {
+                navController.popBackStack()
+            }
+        }
+    }
+}
+
+fun saveToFirebase(book: Book, navController: NavController) {
+    val db = FirebaseFirestore.getInstance()
+    val dbCollection = db.collection("books")
+
+    if (book.toString().isNotEmpty()) {
+        dbCollection.add(book).addOnSuccessListener { documentRef ->
+            val docId = documentRef.id
+
+            dbCollection.document(docId).update(hashMapOf("id" to docId) as Map<String, Any>)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        navController.popBackStack()
+                    }
+                }
+        }
     }
 }
