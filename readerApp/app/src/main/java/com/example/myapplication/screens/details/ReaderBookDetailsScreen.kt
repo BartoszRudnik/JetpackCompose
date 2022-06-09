@@ -1,22 +1,28 @@
 package com.example.myapplication.screens.details
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import android.text.Html
+import android.widget.Space
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.text.HtmlCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.example.myapplication.components.HomeScreenTopBar
 import com.example.myapplication.data.DataOrException
 import com.example.myapplication.model.Item
@@ -54,11 +60,73 @@ fun BookDetailsScreen(
                 }.value
 
                 if (bookInfo.data == null) {
-                    LinearProgressIndicator()
+                    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                        LinearProgressIndicator()
+                        Text(text = "Loading")
+                    }
                 } else {
-                    Text(text = "Book description:")
+                    ShowBookDetails(bookInfo, navController)
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ShowBookDetails(
+    bookInfo: DataOrException<Item, Boolean, Exception>,
+    navController: NavController
+) {
+    val bookData = bookInfo.data?.volumeInfo
+    val googleBookId = bookInfo.data?.id
+
+    Column() {
+        Card(modifier = Modifier.padding(16.dp), shape = CircleShape, elevation = 4.dp) {
+            Image(
+                painter = rememberImagePainter(data = bookData?.imageLinks?.thumbnail),
+                contentDescription = "book image",
+                modifier = Modifier
+                    .width(90.dp)
+                    .height(90.dp)
+                    .padding(4.dp)
+            )
+        }
+        Text(
+            text = bookData!!.title,
+            style = MaterialTheme.typography.h6,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 4
+        )
+        Text(text = "Authors: ${bookData.authors}")
+        Text(text = "Page count: ${bookData.pageCount}")
+        Text(
+            text = "Categories: ${bookData.categories}",
+            style = MaterialTheme.typography.subtitle1
+        )
+        Text(
+            text = "Published: ${bookData.publishedDate}",
+            style = MaterialTheme.typography.subtitle1
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+
+        val localDims = LocalContext.current.resources.displayMetrics
+        Surface(
+            modifier = Modifier
+                .padding(4.dp)
+                .height(localDims.heightPixels.dp.times(0.09f)),
+            shape = RectangleShape,
+            border = BorderStroke(width = 1.dp, color = Color.DarkGray)
+        ) {
+            val cleanDescription =
+                HtmlCompat.fromHtml(bookData.description, HtmlCompat.FROM_HTML_MODE_LEGACY)
+                    .toString()
+
+            LazyColumn(modifier = Modifier.padding(4.dp)) {
+                item {
+                    Text(text = cleanDescription)
+                }
+            }
+        }
+
     }
 }
