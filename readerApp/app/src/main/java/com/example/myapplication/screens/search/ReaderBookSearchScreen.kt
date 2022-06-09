@@ -18,6 +18,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -90,7 +91,7 @@ fun BookRow(book: Item, navController: NavController) {
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            val imageUrl = ""
+            val imageUrl = book.volumeInfo.imageLinks.smallThumbnail
 
             Image(
                 painter = rememberImagePainter(data = imageUrl),
@@ -106,7 +107,26 @@ fun BookRow(book: Item, navController: NavController) {
                 Text(
                     text = "Authors: " + book.volumeInfo.authors.toString(),
                     overflow = TextOverflow.Clip,
-                    style = MaterialTheme.typography.caption
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
+                )
+                Text(
+                    text = "Date: " + book.volumeInfo.publishedDate,
+                    overflow = TextOverflow.Clip,
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
+                )
+                Text(
+                    text = "Publisher: " + book.volumeInfo.publisher,
+                    overflow = TextOverflow.Clip,
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
+                )
+                Text(
+                    text = book.volumeInfo.categories.toString(),
+                    overflow = TextOverflow.Clip,
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
                 )
             }
         }
