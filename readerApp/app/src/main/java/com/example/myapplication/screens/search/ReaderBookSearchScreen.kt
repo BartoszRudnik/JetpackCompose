@@ -20,14 +20,18 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.myapplication.components.HomeScreenTopBar
 import com.example.myapplication.components.InputField
-import com.example.myapplication.model.Book
+import com.example.myapplication.model.Item
 
 @Composable
-fun ReaderBookSearchScreen(navController: NavController) {
+fun ReaderBookSearchScreen(
+    navController: NavController,
+    viewModel: BookSearchViewModel = hiltViewModel()
+) {
     Scaffold(topBar = {
         HomeScreenTopBar(
             navController = navController,
@@ -37,40 +41,45 @@ fun ReaderBookSearchScreen(navController: NavController) {
             navController.popBackStack()
         }
     }) {
-        Surface() {
+        Surface {
             Column {
                 SearchForm(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    viewModel = viewModel,
                 ) { value ->
-
+                    viewModel.searchBooks(value)
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))
-                BookList(navController)
+                BookList(navController, viewModel)
             }
         }
     }
 }
 
 @Composable
-fun BookList(navController: NavController) {
-    val listOfBooks = emptyList<Book>()
+fun BookList(navController: NavController, viewModel: BookSearchViewModel) {
+    if (viewModel.listOfBooks.value.loading!!) {
+        CircularProgressIndicator()
+    }
+
+    val listOfBooks = viewModel.listOfBooks.value.data
 
     LazyColumn(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxSize()
     ) {
-        items(items = listOfBooks) { book ->
-            BookRow(book, navController)
+        items(items = listOfBooks!!) { item ->
+            BookRow(item, navController)
         }
     }
 }
 
 @Composable
-fun BookRow(book: Book, navController: NavController) {
+fun BookRow(book: Item, navController: NavController) {
     Card(modifier = Modifier
         .clickable { }
         .fillMaxWidth()
@@ -92,10 +101,10 @@ fun BookRow(book: Book, navController: NavController) {
                     .padding(4.dp)
             )
 
-            Column() {
-                Text(text = book.title.toString(), overflow = TextOverflow.Ellipsis)
+            Column {
+                Text(text = book.volumeInfo.title, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = "Authors: " + book.authors.toString(),
+                    text = "Authors: " + book.volumeInfo.authors.toString(),
                     overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.caption
                 )
@@ -110,9 +119,10 @@ fun SearchForm(
     modifier: Modifier = Modifier,
     loading: Boolean = false,
     hint: String = "Search",
+    viewModel: BookSearchViewModel,
     onSearch: (String) -> Unit = {}
 ) {
-    Column() {
+    Column {
         val searchQueryState = rememberSaveable {
             mutableStateOf("")
         }
