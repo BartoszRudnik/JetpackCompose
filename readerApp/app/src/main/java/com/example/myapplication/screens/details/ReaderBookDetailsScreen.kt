@@ -1,7 +1,5 @@
 package com.example.myapplication.screens.details
 
-import android.text.Html
-import android.widget.Space
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -84,7 +82,7 @@ fun ShowBookDetails(
     val bookData = bookInfo.data?.volumeInfo
     val googleBookId = bookInfo.data?.id
 
-    Column() {
+    Column {
         Card(modifier = Modifier.padding(16.dp), shape = CircleShape, elevation = 4.dp) {
             Image(
                 painter = rememberImagePainter(data = bookData?.imageLinks?.thumbnail),

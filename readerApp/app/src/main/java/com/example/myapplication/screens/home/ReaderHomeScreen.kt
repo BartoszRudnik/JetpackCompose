@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.myapplication.components.FABContent
@@ -31,7 +32,10 @@ import com.example.myapplication.navigation.ReaderScreens
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun ReaderHomeScreen(navController: NavController) {
+fun ReaderHomeScreen(
+    navController: NavController,
+    viewModel: HomeScreenViewModel = hiltViewModel()
+) {
     Scaffold(topBar = {
         HomeScreenTopBar(navController = navController, title = "A. Reader")
     }, floatingActionButton = {
@@ -40,14 +44,22 @@ fun ReaderHomeScreen(navController: NavController) {
         }
     }) {
         Surface(modifier = Modifier.fillMaxSize()) {
-            HomeContent(navController = navController)
+            HomeContent(navController = navController, viewModel = viewModel)
         }
     }
 }
 
 @Composable
-fun HomeContent(navController: NavController) {
+fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
     val currentUserName = FirebaseAuth.getInstance().currentUser?.email!!.split("@")[0]
+    var listOfBooks = emptyList<Book>()
+    val currentUser = FirebaseAuth.getInstance().currentUser
+
+    if (!viewModel.data.value.data.isNullOrEmpty()) {
+        listOfBooks = viewModel.data.value.data!!.toList().filter { book ->
+            book.userId == currentUser?.uid.toString()
+        }
+    }
 
     Column(modifier = Modifier.padding(8.dp), verticalArrangement = Arrangement.Top) {
         Row(modifier = Modifier.align(alignment = Alignment.Start)) {

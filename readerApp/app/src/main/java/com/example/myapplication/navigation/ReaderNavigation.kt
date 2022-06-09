@@ -9,6 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.myapplication.screens.ReaderSplashScreen
 import com.example.myapplication.screens.details.BookDetailsScreen
+import com.example.myapplication.screens.home.HomeScreenViewModel
 import com.example.myapplication.screens.home.ReaderHomeScreen
 import com.example.myapplication.screens.login.ReaderLoginScreen
 import com.example.myapplication.screens.search.BookSearchViewModel
@@ -23,7 +24,9 @@ fun ReaderNavigation() {
             ReaderSplashScreen(navController = navController)
         }
         composable(ReaderScreens.HomeScreen.name) {
-            ReaderHomeScreen(navController = navController)
+            val viewModel = hiltViewModel<HomeScreenViewModel>()
+
+            ReaderHomeScreen(navController = navController, viewModel)
         }
         composable(ReaderScreens.LoginScreen.name) {
             ReaderLoginScreen(navController = navController)
