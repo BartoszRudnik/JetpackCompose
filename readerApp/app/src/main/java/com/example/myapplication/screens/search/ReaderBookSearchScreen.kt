@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.myapplication.components.HomeScreenTopBar
 import com.example.myapplication.components.InputField
+import com.example.myapplication.model.Book
 import com.example.myapplication.model.Item
 import com.example.myapplication.navigation.ReaderScreens
 
@@ -127,6 +128,56 @@ fun BookRow(book: Item, navController: NavController) {
                 )
                 Text(
                     text = book.volumeInfo.categories.toString(),
+                    overflow = TextOverflow.Clip,
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BookRowV2(book: Book, navController: NavController) {
+    Card(modifier = Modifier
+        .clickable {
+            navController.navigate(ReaderScreens.DetailsScreen.name + "/${book.id}")
+        }
+        .fillMaxWidth()
+        .height(100.dp)
+        .padding(4.dp), shape = RectangleShape, elevation = 6.dp) {
+        Row(
+            modifier = Modifier.padding(6.dp),
+            verticalAlignment = Alignment.Top,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            val imageUrl = book.photoUrl
+
+            Image(
+                painter = rememberImagePainter(data = imageUrl),
+                contentDescription = "book image",
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(80.dp)
+                    .padding(4.dp)
+            )
+
+            Column {
+                Text(text = book.title!!, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = "Authors: " + book.authors.toString(),
+                    overflow = TextOverflow.Clip,
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
+                )
+                Text(
+                    text = "Date: " + book.publishedDate,
+                    overflow = TextOverflow.Clip,
+                    style = MaterialTheme.typography.caption,
+                    fontStyle = FontStyle.Italic,
+                )
+                Text(
+                    text = book.categories.toString(),
                     overflow = TextOverflow.Clip,
                     style = MaterialTheme.typography.caption,
                     fontStyle = FontStyle.Italic,
