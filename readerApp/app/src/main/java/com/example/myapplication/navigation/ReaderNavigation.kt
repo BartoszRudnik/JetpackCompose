@@ -15,6 +15,7 @@ import com.example.myapplication.screens.login.ReaderLoginScreen
 import com.example.myapplication.screens.search.BookSearchViewModel
 import com.example.myapplication.screens.search.ReaderBookSearchScreen
 import com.example.myapplication.screens.stats.ReaderStatsScreen
+import com.example.myapplication.screens.update.ReaderBookUpdateScreen
 
 @Composable
 fun ReaderNavigation() {
@@ -48,6 +49,18 @@ fun ReaderNavigation() {
                 BookDetailsScreen(navController = navController, bookId = it!!)
             }
 
+        }
+
+        composable(
+            ReaderScreens.BookUpdateScreen.name + "/bookItemId", arguments = listOf(
+                navArgument("bookItemId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            backStackEntry.arguments?.getString("bookItemId").let {
+                ReaderBookUpdateScreen(navController = navController, it!!)
+            }
         }
     }
 }

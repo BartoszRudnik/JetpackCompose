@@ -95,7 +95,9 @@ fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
 
 @Composable
 fun BookListArea(listOfBooks: List<Book>, navController: NavController) {
-    HorizontalScrollableComponent(listOfBooks) {}
+    HorizontalScrollableComponent(listOfBooks) {
+        navController.navigate(ReaderScreens.BookUpdateScreen.name + "/$it")
+    }
 }
 
 @Composable
@@ -110,7 +112,7 @@ fun HorizontalScrollableComponent(listOfBooks: List<Book>, onCardPressed: (Strin
     ) {
         for (book in listOfBooks) {
             ListCard(book = book) {
-                onCardPressed(it)
+                onCardPressed(book.googleBookId!!)
             }
         }
     }
@@ -149,7 +151,7 @@ fun ListCard(
         ) {
             Row(horizontalArrangement = Arrangement.Center) {
                 Image(
-                    painter = rememberImagePainter(data = ""),
+                    painter = rememberImagePainter(data = book.photoUrl.toString()),
                     contentDescription = "Book image",
                     modifier = Modifier
                         .height(140.dp)
@@ -169,7 +171,7 @@ fun ListCard(
                         contentDescription = "favorite icon",
                         modifier = Modifier.padding(2.dp)
                     )
-                    BookRating()
+                    BookRating(book.rating!!)
                 }
             }
             Text(
@@ -225,7 +227,7 @@ fun RoundedButton(label: String = "Reading", radius: Int = 30, onPress: () -> Un
 }
 
 @Composable
-fun BookRating(score: Double = 3.5) {
+fun BookRating(score: Double) {
     Surface(
         modifier = Modifier
             .height(70.dp)
