@@ -1,5 +1,8 @@
 package com.example.myapplication.screens.update
 
+import android.os.Build
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -10,10 +13,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,10 +35,10 @@ import com.example.myapplication.data.DataOrException
 import com.example.myapplication.model.Book
 import com.example.myapplication.screens.home.HomeScreenViewModel
 import com.example.myapplication.screens.home.RoundedButton
+import com.example.myapplication.utils.formatDate
 import com.google.firebase.firestore.FirebaseFirestore
-import java.sql.Timestamp
-import java.time.Instant.now
 
+@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun ReaderBookUpdateScreen(
     navController: NavController,
@@ -64,7 +65,7 @@ fun ReaderBookUpdateScreen(
             value = viewModel.data.value
         }.value
 
-        androidx.compose.material.Surface(
+        Surface(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(8.dp)
@@ -77,7 +78,7 @@ fun ReaderBookUpdateScreen(
                 if (bookInfo.loading!!) {
                     LinearProgressIndicator()
                 } else {
-                    androidx.compose.material.Surface(
+                    Surface(
                         modifier = Modifier
                             .padding(4.dp)
                             .fillMaxWidth(),
@@ -95,8 +96,10 @@ fun ReaderBookUpdateScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.N)
 @Composable
 fun ShowSimpleForm(book: Book, navController: NavController) {
+    val context = LocalContext.current
     val notesText = remember {
         mutableStateOf("")
     }
@@ -143,7 +146,7 @@ fun ShowSimpleForm(book: Book, navController: NavController) {
                     Text(text = "Finished Reading!")
                 }
             } else {
-                Text(text = "Finished on: ${book.finishedReading}")
+                Text(text = "Finished on: ${formatDate(book.finishedReading!!)}")
             }
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -172,13 +175,75 @@ fun ShowSimpleForm(book: Book, navController: NavController) {
 
                     FirebaseFirestore.getInstance().collection("books").document(book.id!!)
                         .update(bookToUpdate).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(
+                                    context,
+                                    "Book updated successfully",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                navController.popBackStack()
+                            }
                         }.addOnFailureListener {
 
                         }
                 }
             }
-            RoundedButton(label = "Delete")
+
+            val openDialog = remember {
+                mutableStateOf(false)
+            }
+
+            if (openDialog.value) {
+                ShowAlertDialog(
+                    text = "Are you sure you want to delete this book" + "\n" + "This action is not reversible",
+                    openDialog = openDialog
+                ) {
+                    FirebaseFirestore.getInstance().collection("books").document(book.id!!).delete()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Toast.makeText(
+                                    context,
+                                    "Book deleted successfully",
+                                    Toast.LENGTH_LONG
+                                ).show()
+
+                                openDialog.value = false
+                                navController.popBackStack()
+                            }
+                        }
+                }
+            }
+            RoundedButton(label = "Delete") {
+                openDialog.value = true
+            }
         }
+    }
+}
+
+@Composable
+fun ShowAlertDialog(
+    text: String,
+    openDialog: MutableState<Boolean>,
+    onYesPressed: () -> Unit = {},
+) {
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+            },
+            title = { Text(text = "Delete book") },
+            text = { Text(text) },
+            buttons = {
+                Row(modifier = Modifier.padding(8.dp), horizontalArrangement = Arrangement.Center) {
+                    TextButton(onClick = { onYesPressed.invoke() }) {
+                        Text(text = "Yes")
+                    }
+                    TextButton(onClick = { openDialog.value = false }) {
+                        Text(text = "No")
+                    }
+                }
+            })
     }
 }
 
@@ -190,7 +255,7 @@ fun SimpleForm(
     defaultValue: String = "Great Book",
     onSearch: (String) -> Unit = {}
 ) {
-    Column() {
+    Column {
         val textFieldValue = rememberSaveable {
             mutableStateOf(defaultValue)
         }
@@ -219,7 +284,7 @@ fun SimpleForm(
 
 @Composable
 fun ShowBookUpdate(bookInfo: DataOrException<List<Book>, Boolean, Exception>, bookItemId: String) {
-    Row() {
+    Row {
         Spacer(modifier = Modifier.width(40.dp))
 
         if (bookInfo.data != null) {
@@ -259,7 +324,7 @@ fun CardListItem(book: Book, onPressDetails: () -> Unit) {
                         )
                     )
             )
-            Column() {
+            Column {
                 Text(
                     text = book.title.toString(),
                     style = MaterialTheme.typography.h6,
