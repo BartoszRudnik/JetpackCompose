@@ -12,6 +12,8 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,13 +97,21 @@ fun HomeContent(navController: NavController, viewModel: HomeScreenViewModel) {
 
 @Composable
 fun BookListArea(listOfBooks: List<Book>, navController: NavController) {
-    HorizontalScrollableComponent(listOfBooks) {
+    val addedBooks = listOfBooks.filter { book ->
+        book.startedReading == null && book.finishedReading == null
+    }
+
+    HorizontalScrollableComponent(addedBooks) {
         navController.navigate(ReaderScreens.BookUpdateScreen.name + "/$it")
     }
 }
 
 @Composable
-fun HorizontalScrollableComponent(listOfBooks: List<Book>, onCardPressed: (String) -> Unit = {}) {
+fun HorizontalScrollableComponent(
+    listOfBooks: List<Book>,
+    viewModel: HomeScreenViewModel = hiltViewModel(),
+    onCardPressed: (String) -> Unit = {},
+) {
     val scrollState = rememberScrollState()
 
     Row(
@@ -110,9 +120,23 @@ fun HorizontalScrollableComponent(listOfBooks: List<Book>, onCardPressed: (Strin
             .heightIn(280.dp)
             .horizontalScroll(scrollState)
     ) {
-        for (book in listOfBooks) {
-            ListCard(book = book) {
-                onCardPressed(book.googleBookId!!)
+        if (viewModel.data.value.loading == true) {
+            LinearProgressIndicator()
+        } else {
+            if (listOfBooks.isEmpty()) {
+                Surface(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = "No books found, add new book!",
+                        color = Color.Red.copy(alpha = 0.6f),
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            for (book in listOfBooks) {
+                ListCard(book = book) {
+                    onCardPressed(book.googleBookId!!)
+                }
             }
         }
     }
@@ -120,7 +144,13 @@ fun HorizontalScrollableComponent(listOfBooks: List<Book>, onCardPressed: (Strin
 
 @Composable
 fun ReadingRightNowArea(books: List<Book>, navController: NavController) {
-    ListCard()
+    val filteredBooks = books.filter { book ->
+        book.startedReading != null && book.finishedReading == null
+    }
+
+    HorizontalScrollableComponent(filteredBooks) {
+        navController.navigate(ReaderScreens.BookUpdateScreen.name + "/$it")
+    }
 }
 
 @Composable
@@ -186,11 +216,20 @@ fun ListCard(
                 style = MaterialTheme.typography.caption
             )
 
+            val isStartedReading = remember {
+                mutableStateOf(false)
+            }
+
             Row(
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.Bottom
             ) {
-                RoundedButton(label = "Reading", radius = 70)
+                isStartedReading.value = book.startedReading != null
+
+                RoundedButton(
+                    label = if (isStartedReading.value) "Reading" else "Not started",
+                    radius = 70
+                )
             }
         }
     }
